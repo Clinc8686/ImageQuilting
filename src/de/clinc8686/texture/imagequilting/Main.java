@@ -33,10 +33,13 @@ public class Main {
     }
 
     public static void ImageQuilting() {
+        boolean firstImage = true;
         int[][] inputImagePixels = getImagePixels(inputImage);
         showImage(inputImage);
         BufferedImage startImage = randomisedImage(inputImagePixels);
+        inputImagePixels = getImagePixels(startImage);
         showImage(startImage);
+        BufferedImage bestImage = startImage;
 
         ArrayList<BufferedImage> allPixelBlocks = getAllPixelBlocks(inputImage);
         ArrayList<BufferedImage> endImageList = new ArrayList<>();
@@ -46,15 +49,29 @@ public class Main {
         for (int x = 0; x < toFilledBlocksWidth; x++) {
             int yBlock = x*randomImageHeight;
             for (int y = 0; y < toFilledBlocksHeight; y++) {
-                int xBlock = x*randomImageWidth;
-                int[][] topImagePixels = new int[0][];
-                if (!firstLine) {
-                    topImagePixels = getImagePixels(endImageList.get(endImageList.size()-toFilledBlocksWidth));
+                int xBlock = y*randomImageWidth;
+                if (!firstImage) {
+                    int[][] topImagePixels = new int[0][];
+                    if (!firstLine) {
+                        topImagePixels = getImagePixels(endImageList.get(endImageList.size()-toFilledBlocksWidth));
+                    }
+                    bestImage = compare(allPixelBlocks, inputImagePixels, topImagePixels, firstLine);
+                    int[][] bestPixels = getImagePixels(bestImage);
+                    inputImagePixels = bestPixels;
+                } else {
+                    firstImage = false;
                 }
-                BufferedImage bestImage = compare(allPixelBlocks, inputImagePixels, topImagePixels, firstLine);
-                int[][] bestPixels = getImagePixels(bestImage);
-                inputImagePixels = bestPixels;
                 endImageList.add(bestImage);
+
+/*                for (int xPixelBlock = 0; xPixelBlock < randomImageHeight; xPixelBlock++) {
+                    //System.out.print("x " + (xPixelBlock+xBlock) + " y " + ( yPixelBlock+yBlock) + ", ");  //---
+                    //endImage.setRGB(xPixelBlock+xBlock, yBlock, bestImage.getRGB(xPixelBlock, yPixelBlock));
+                    for (int yPixelBlock = 0; yPixelBlock < randomImageWidth; yPixelBlock++) {
+                        //System.out.println("x2 " + xBlock + " y2 " + (yPixelBlock+yBlock)); //---
+                        //System.out.println();
+                        endImage.setRGB((xPixelBlock+yBlock), (xBlock+yPixelBlock), bestImage.getRGB(xPixelBlock,yPixelBlock));
+                    }
+                }*/
 
                 for (int yPixelBlock = 0; yPixelBlock < randomImageWidth; yPixelBlock++) {
                     endImage.setRGB(xBlock, yPixelBlock+yBlock, bestImage.getRGB(0,yPixelBlock));
@@ -69,7 +86,6 @@ public class Main {
 
     public static BufferedImage compare(ArrayList<BufferedImage> allPixelBlocks, int[][] inputImagePixels, int[][] topImagePixels, boolean firstLine) {
         ArrayList<ComparedImage> comparedImages = new ArrayList<>();
-        int minimalError = 0;
         double error = 0;
         for (BufferedImage image : allPixelBlocks) {
             for (int secondImageX = 0; secondImageX < patchSize; secondImageX++) {
@@ -108,16 +124,20 @@ public class Main {
                     int secImageGreen = secondImagePixelColor.getGreen();
                     int secImageBlue = secondImagePixelColor.getBlue();
 
-                    int redPow = (firImageRed - secImageRed) * (firImageRed - secImageRed);
+                    //--
+                    double diff = Math.sqrt(Math.pow((firImageRed-secImageRed),2) + Math.pow((firImageBlue - secImageBlue),2) + Math.pow((firImageGreen-secImageGreen),2));
+                    error = error + diff;
+                    //--
+
+                    /*int redPow = (firImageRed - secImageRed) * (firImageRed - secImageRed);
                     int greenPow = (firImageGreen - secImageGreen) * (firImageGreen - secImageGreen);
                     int bluePow = (firImageBlue - secImageBlue) * (firImageBlue - secImageBlue);
                     double difference = Math.sqrt(redPow + greenPow + bluePow);
-                    error = error + difference;
+                    error = error + difference; */
                 }
             }
             comparedImages.add(new ComparedImage(image, error));
         }
-
         return chooseLowestError(comparedImages);
     }
 
@@ -125,10 +145,15 @@ public class Main {
         double min = Double.MAX_VALUE;
         int counter = 0, bestImage = 0;
         for (ComparedImage comIm : comparedImages) {
-            if (comIm.difference < min) {
+            if (Double.compare(comIm.difference, min) < 0) {
                 min = comIm.difference;
                 bestImage = counter;
             }
+
+            /*if (comIm.difference < min) {
+                min = comIm.difference;
+                bestImage = counter;
+            }*/
             counter++;
         }
 
