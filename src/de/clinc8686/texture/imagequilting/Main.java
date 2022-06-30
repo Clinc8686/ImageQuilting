@@ -16,7 +16,7 @@ public class Main {
     private static final int randomImageWidth = 16;
     private static final int endImageHeight = 192;
     private static final int endImageWidth = 192;
-    private static final int patchSize = 4;
+    private static final int patchSize = 6;
     private static BufferedImage inputImage;
     private static BufferedImage endImage;
 
@@ -63,16 +63,6 @@ public class Main {
                 }
                 endImageList.add(bestImage);
 
-/*                for (int xPixelBlock = 0; xPixelBlock < randomImageHeight; xPixelBlock++) {
-                    //System.out.print("x " + (xPixelBlock+xBlock) + " y " + ( yPixelBlock+yBlock) + ", ");  //---
-                    //endImage.setRGB(xPixelBlock+xBlock, yBlock, bestImage.getRGB(xPixelBlock, yPixelBlock));
-                    for (int yPixelBlock = 0; yPixelBlock < randomImageWidth; yPixelBlock++) {
-                        //System.out.println("x2 " + xBlock + " y2 " + (yPixelBlock+yBlock)); //---
-                        //System.out.println();
-                        endImage.setRGB((xPixelBlock+yBlock), (xBlock+yPixelBlock), bestImage.getRGB(xPixelBlock,yPixelBlock));
-                    }
-                }*/
-
                 for (int yPixelBlock = 0; yPixelBlock < randomImageWidth; yPixelBlock++) {
                     endImage.setRGB(xBlock, yPixelBlock+yBlock, bestImage.getRGB(0,yPixelBlock));
                     for (int xPixelBlock = 0; xPixelBlock < randomImageHeight; xPixelBlock++) {
@@ -93,19 +83,8 @@ public class Main {
 
                 for (int y = 0; y < randomImageHeight; y++) {
                     Color firstImagePixelColor = new Color(inputImagePixels[firstImageX][y]);
-                    int firImageRed = firstImagePixelColor.getRed();
-                    int firImageGreen = firstImagePixelColor.getGreen();
-                    int firImageBlue = firstImagePixelColor.getBlue();
-
                     Color secondImagePixelColor = new Color(image.getRGB(secondImageX,y));
-                    int secImageRed = secondImagePixelColor.getRed();
-                    int secImageGreen = secondImagePixelColor.getGreen();
-                    int secImageBlue = secondImagePixelColor.getBlue();
-
-                    int redPow = (firImageRed - secImageRed) * (firImageRed - secImageRed);
-                    int greenPow = (firImageGreen - secImageGreen) * (firImageGreen - secImageGreen);
-                    int bluePow = (firImageBlue - secImageBlue) * (firImageBlue - secImageBlue);
-                    double difference = Math.sqrt(redPow + greenPow + bluePow);
+                    double difference = calculateDifference(firstImagePixelColor, secondImagePixelColor);
                     error = error + difference;
                 }
             }
@@ -115,30 +94,19 @@ public class Main {
 
                 for (int x = 0; x < patchSize; x++) {
                     Color firstImagePixelColor = new Color(topImagePixels[x][firstImageY]);
-                    int firImageRed = firstImagePixelColor.getRed();
-                    int firImageGreen = firstImagePixelColor.getGreen();
-                    int firImageBlue = firstImagePixelColor.getBlue();
-
                     Color secondImagePixelColor = new Color(image.getRGB(x,secondImageY));
-                    int secImageRed = secondImagePixelColor.getRed();
-                    int secImageGreen = secondImagePixelColor.getGreen();
-                    int secImageBlue = secondImagePixelColor.getBlue();
-
-                    //--
-                    double diff = Math.sqrt(Math.pow((firImageRed-secImageRed),2) + Math.pow((firImageBlue - secImageBlue),2) + Math.pow((firImageGreen-secImageGreen),2));
-                    error = error + diff;
-                    //--
-
-                    /*int redPow = (firImageRed - secImageRed) * (firImageRed - secImageRed);
-                    int greenPow = (firImageGreen - secImageGreen) * (firImageGreen - secImageGreen);
-                    int bluePow = (firImageBlue - secImageBlue) * (firImageBlue - secImageBlue);
-                    double difference = Math.sqrt(redPow + greenPow + bluePow);
-                    error = error + difference; */
+                    double difference = calculateDifference(firstImagePixelColor, secondImagePixelColor);
+                    error = error + difference;
                 }
             }
             comparedImages.add(new ComparedImage(image, error));
+            error = 0;
         }
         return chooseLowestError(comparedImages);
+    }
+
+    private static double calculateDifference(Color first, Color second) {
+        return Math.sqrt(Math.pow((first.getRed()-second.getRed()),2) + Math.pow((first.getBlue() - second.getBlue()),2) + Math.pow((first.getGreen()-second.getGreen()),2));
     }
 
     private static BufferedImage chooseLowestError(ArrayList<ComparedImage> comparedImages) {
@@ -150,10 +118,6 @@ public class Main {
                 bestImage = counter;
             }
 
-            /*if (comIm.difference < min) {
-                min = comIm.difference;
-                bestImage = counter;
-            }*/
             counter++;
         }
 
