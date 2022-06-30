@@ -12,14 +12,17 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Main {
-    private static final int randomImageHeight = 16;
-    private static final int randomImageWidth = 16;
+    private static final int randomImageHeight = 32;
+    private static final int randomImageWidth = 32;
     private static final int endImageHeight = 192;
     private static final int endImageWidth = 192;
-    private static final int patchSize = 6;
+    private static final int patchSize = 4;
     private static BufferedImage inputImage;
     private static BufferedImage endImage;
 
+    /*
+    main
+     */
     public static void main(String[] args) throws IOException {
         long start = System.currentTimeMillis();
         inputImage = ImageIO.read(new File("C:\\Users\\Mario\\OneDrive\\Dokumente\\Programmierung-Privat\\ImageQuilting\\src\\de\\clinc8686\\texture\\imagequilting\\texture_input.jpg"));
@@ -32,6 +35,9 @@ public class Main {
         System.out.print("Execution time is " + formatter.format((end - start) / 1000d) + " seconds");
     }
 
+    /*
+
+     */
     public static void ImageQuilting() {
         boolean firstImage = true;
         int[][] inputImagePixels = getImagePixels(inputImage);
@@ -90,7 +96,7 @@ public class Main {
             }
 
             for (int firstImageY = 0; firstImageY < patchSize && !firstLine; firstImageY++) {
-                int secondImageY = randomImageHeight-firstImageY - 1;
+                int secondImageY = randomImageHeight - firstImageY - 1;
 
                 for (int x = 0; x < patchSize; x++) {
                     Color firstImagePixelColor = new Color(topImagePixels[x][firstImageY]);
@@ -109,6 +115,9 @@ public class Main {
         return Math.sqrt(Math.pow((first.getRed()-second.getRed()),2) + Math.pow((first.getBlue() - second.getBlue()),2) + Math.pow((first.getGreen()-second.getGreen()),2));
     }
 
+    /*
+    Compares all overlap errors and returns the best.
+     */
     private static BufferedImage chooseLowestError(ArrayList<ComparedImage> comparedImages) {
         double min = Double.MAX_VALUE;
         int counter = 0, bestImage = 0;
@@ -117,13 +126,16 @@ public class Main {
                 min = comIm.difference;
                 bestImage = counter;
             }
-
             counter++;
         }
 
         return comparedImages.get(bestImage).image;
     }
 
+    /*
+    Runs through all pixels and slices each pixel with his neighbour pixels
+    into a new block that can later be iterated.
+     */
     private static ArrayList<BufferedImage> getAllPixelBlocks(BufferedImage inputImage) {
         int[][] inputImagePixels = getImagePixels(inputImage);
         int distanceToBorderXAxis = inputImagePixels.length - randomImageWidth;
@@ -142,9 +154,12 @@ public class Main {
                 allPixelBlocks.add(startImage);
             }
         }
-        return allPixelBlocks;  //size = 2304
+        return allPixelBlocks;
     }
 
+    /*
+    Prints the image as jframe.
+     */
     private static void showImage(BufferedImage image) {
         JFrame frame = new JFrame();
         frame.getContentPane().setLayout(new FlowLayout());
@@ -153,6 +168,10 @@ public class Main {
         frame.setVisible(true);
     }
 
+    /*
+    Choose one random image from the input texture and use it as the start block.
+    The size of the start block is defined by randomImageWidth and randomImageHeight.
+     */
     private static BufferedImage randomisedImage(int[][] inputPixels) {
         BufferedImage startImage = new BufferedImage(randomImageWidth, randomImageHeight, BufferedImage.TYPE_INT_RGB);
         Random rand = new Random();
@@ -172,6 +191,9 @@ public class Main {
         return startImage;
     }
 
+    /*
+    Converts the image into his pixel rgb-values and returns it.
+     */
     private static int[][] getImagePixels(BufferedImage inputImage) {
         int imageHeight = inputImage.getHeight();
         int imageWidth = inputImage.getWidth();
