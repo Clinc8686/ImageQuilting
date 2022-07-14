@@ -110,7 +110,7 @@ public class Main {
                 int yPixelBlockPosition = yOuterLoop*randomImageWidth;
                 ArrayList<Coords> bestCutCoordsLR = new ArrayList<>();
                 ArrayList<Coords> bestCutCoordsTD = new ArrayList<>();
-                if (!firstImage || xPixelBlockPosition != 0) {
+                if (!firstImage) {
                     int[][] topImagePixels = new int[0][];
                     if (!firstLine) {
                         topImagePixels = getImagePixels(endImageList.get(endImageList.size()-toFilledBlocksWidth));
@@ -126,23 +126,25 @@ public class Main {
                         bestCutCoordsTD = cutOverlapTop(topImagePixels, inputImagePixels);
                     }
 
-                    int xCutRightImage = 0;
-                    for (int yInnerLoop = 0; yInnerLoop < randomImageHeight; yInnerLoop++) {
-                        xCutRightImage = bestCutCoordsLR.get(yInnerLoop).x;
-                        int startPosition = xPixelBlockPosition-(patchSize*xOuterLoop);
-                        for (int xInnerLoop = xCutRightImage; xInnerLoop < randomImageWidth; xInnerLoop++) {
-                            endImage.setRGB(xInnerLoop+startPosition, yInnerLoop+yPixelBlockPosition, bestImage.getRGB(xInnerLoop,yInnerLoop));
+                    if (xPixelBlockPosition == 0) {
+                        concatSimplePadding(bestImage, xPixelBlockPosition, yPixelBlockPosition);
+                    } else {
+                        int xCutRightImage = 0;
+                        int yCutDownImage = 0;
+                        for (int yInnerLoop = 0; yInnerLoop < randomImageHeight; yInnerLoop++) {
+
+                            xCutRightImage = bestCutCoordsLR.get(yInnerLoop).x;
+                            int startPosition = xPixelBlockPosition-(patchSize*xOuterLoop);
+                            for (int xInnerLoop = xCutRightImage; xInnerLoop < randomImageWidth; xInnerLoop++) {
+                                endImage.setRGB(xInnerLoop+startPosition, yInnerLoop+yPixelBlockPosition, bestImage.getRGB(xInnerLoop,yInnerLoop));
+                            }
                         }
                     }
+
                 //First image top left or first left pixel block in row
                 } else {
                     firstImage = false;
-                    for (int yInnerLoop = 0; yInnerLoop < randomImageHeight; yInnerLoop++) {
-                        endImage.setRGB(xPixelBlockPosition, yInnerLoop+yPixelBlockPosition, bestImage.getRGB(0,yInnerLoop));
-                        for (int xInnerLoop = 0; xInnerLoop < randomImageWidth; xInnerLoop++) {
-                            endImage.setRGB(xInnerLoop+xPixelBlockPosition, yInnerLoop+yPixelBlockPosition, bestImage.getRGB(xInnerLoop,yInnerLoop));
-                        }
-                    }
+                    concatSimplePadding(bestImage, xPixelBlockPosition, yPixelBlockPosition);
                 }
                 endImageList.add(bestImage);
             }
@@ -150,13 +152,22 @@ public class Main {
         }
     }
 
+    private static void concatSimplePadding(BufferedImage bestImage, int xPixelBlockPosition, int yPixelBlockPosition) {
+        for (int yInnerLoop = 0; yInnerLoop < randomImageHeight; yInnerLoop++) {
+            endImage.setRGB(xPixelBlockPosition, yInnerLoop+yPixelBlockPosition, bestImage.getRGB(0,yInnerLoop));
+            for (int xInnerLoop = 0; xInnerLoop < randomImageWidth; xInnerLoop++) {
+                endImage.setRGB(xInnerLoop+xPixelBlockPosition, yInnerLoop+yPixelBlockPosition, bestImage.getRGB(xInnerLoop,yInnerLoop));
+            }
+        }
+    }
+
     /*
     Calculates the best cut path between the top and bottom image
      */
     private static ArrayList<Coords> cutOverlapTop(int[][] topImagePixels, int[][] bestImagePixels) {
-        BufferedImage overlap = new BufferedImage(randomImageWidth, randomImageHeight, BufferedImage.TYPE_INT_RGB);
+        BufferedImage overlap = new BufferedImage(randomImageWidth, patchSize, BufferedImage.TYPE_INT_RGB);
         for (int firstImageY = 0; firstImageY < patchSize; firstImageY++) {
-            int secondImageY = randomImageWidth - firstImageY - 1;
+            int secondImageY = patchSize - firstImageY - 1;
             for (int x = 0; x < randomImageHeight; x++) {
                 Color firstImagePixelColor = new Color(topImagePixels[x][firstImageY]);
                 Color secondImagePixelColor = new Color(bestImagePixels[x][secondImageY]);
