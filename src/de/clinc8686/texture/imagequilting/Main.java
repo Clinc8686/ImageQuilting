@@ -109,6 +109,7 @@ public class Main {
             for (int yOuterLoop = 0; yOuterLoop < toFilledBlocksHeight; yOuterLoop++) {
                 int yPixelBlockPosition = yOuterLoop*randomImageWidth;
                 ArrayList<Coords> bestCutCoordsLR = new ArrayList<>();
+                ArrayList<Coords> bestCutCoordsTD = new ArrayList<>();
                 if (!firstImage) {
                     int[][] topImagePixels = new int[0][];
                     if (!firstLine) {
@@ -121,6 +122,7 @@ public class Main {
                     int[][] leftImagePixels = new int[0][];
                     leftImagePixels = getImagePixels(endImageList.get(endImageList.size()-1));
                     bestCutCoordsLR = cutOverlapLeft(leftImagePixels, inputImagePixels);
+                    bestCutCoordsTD = cutOverlapTop(topImagePixels, inputImagePixels);
 
                     //First left pixel block in row
                     if (xPixelBlockPosition == 0) {
@@ -160,7 +162,7 @@ public class Main {
     /*
     Calculates the best cut path between the top and bottom image
      */
-    private static void cutOverlapTop(int[][] bestImagePixels, int[][] topImagePixels) {
+    private static ArrayList<Coords> cutOverlapTop(int[][] bestImagePixels, int[][] topImagePixels) {
         BufferedImage overlap = new BufferedImage(randomImageWidth, randomImageHeight, BufferedImage.TYPE_INT_RGB);
         for (int firstImageY = 0; firstImageY < patchSize; firstImageY++) {
             int secondImageY = randomImageHeight - firstImageY - 1;
@@ -173,6 +175,35 @@ public class Main {
             }
         }
 
+        overlap = rotateImage(overlap);
+        ArrayList<Coords> rotatedBestCoords = findBestPath(overlap);
+        ArrayList<Coords> bestCoords = rotateCoords(rotatedBestCoords);
+        return bestCoords;
+    }
+
+    /*
+    Rotates the Coords back
+     */
+    private static ArrayList<Coords> rotateCoords(ArrayList<Coords> coords) {
+        ArrayList<Coords> newCoords = new ArrayList<>();
+        for (Coords co : coords) {
+            newCoords.add(new Coords(co.y, co.x));
+        }
+        return newCoords;
+    }
+
+    /*
+    Rotates the given Image 90 degrees and returns it
+     */
+    private static BufferedImage rotateImage(BufferedImage image) {
+        int height = image.getHeight();
+        int width = image.getWidth();
+        BufferedImage rotatedImage = new BufferedImage(height, width, BufferedImage.TYPE_INT_RGB);
+            for (int i = 0; i < width; i++)
+                for (int j = 0; j < height; j++)
+                    rotatedImage.setRGB(height - j - 1, i, image.getRGB(i, j));
+
+        return rotatedImage;
     }
 
     /*
@@ -195,7 +226,6 @@ public class Main {
             }
         }
         return findBestPath(overlap);
-
     }
 
     /*
