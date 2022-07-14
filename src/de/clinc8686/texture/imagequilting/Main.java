@@ -26,7 +26,7 @@ public class Main {
     private static final int randomImageWidth = 32;
     private static final int endImageHeight = 192;
     private static final int endImageWidth = 192;
-    private static final int patchSize = 6;
+    private static final int patchSize = 3;
     private static BufferedImage inputImage;
     private static BufferedImage endImage;
 
@@ -42,7 +42,7 @@ public class Main {
         //showImage(endImage);
         ImageQuiltingWithCut();
         showImage(endImage);
-        ImageIO.write(endImage, "jpg", new File("C:\\Users\\Mario\\OneDrive\\Dokumente\\Programmierung-Privat\\ImageQuilting\\src\\de\\clinc8686\\texture\\imagequilting\\output_image.jpg"));
+        ImageIO.write(endImage, "jpg", new File(pathString+"\\src\\de\\clinc8686\\texture\\imagequilting\\output_image.jpg"));
 
         long end = System.currentTimeMillis();
         NumberFormat formatter = new DecimalFormat("#0.00000");
