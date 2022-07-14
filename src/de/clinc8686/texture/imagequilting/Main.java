@@ -15,7 +15,7 @@ public class Main {
     private static final int randomImageWidth = 32;
     private static final int endImageHeight = 192;
     private static final int endImageWidth = 192;
-    private static final int patchSize = 4;
+    private static final int patchSize = 3;
     private static BufferedImage inputImage;
     private static BufferedImage endImage;
 
@@ -30,7 +30,7 @@ public class Main {
         //showImage(endImage);
         ImageQuiltingWithCut();
         showImage(endImage);
-        //ImageIO.write(endImage, "jpg", new File("C:\\Users\\Mario\\OneDrive\\Dokumente\\Programmierung-Privat\\ImageQuilting\\src\\de\\clinc8686\\texture\\imagequilting\\output_image.jpg"));
+        ImageIO.write(endImage, "jpg", new File("C:\\Users\\Mario\\OneDrive\\Dokumente\\Programmierung-Privat\\ImageQuilting\\src\\de\\clinc8686\\texture\\imagequilting\\output_image.jpg"));
 
         long end = System.currentTimeMillis();
         NumberFormat formatter = new DecimalFormat("#0.00000");
@@ -110,6 +110,7 @@ public class Main {
                     leftImagePixels = getImagePixels(endImageList.get(endImageList.size()-1));
                     bestCutCoords = cutOverlapLeft(leftImagePixels, inputImagePixels);
 
+                    //First left Pixel Block in row
                     if (xPixelBlockPosition == 0) {
                         //endImageList.add(bestImage);
                         for (int yInnerLoop = 0; yInnerLoop < randomImageHeight; yInnerLoop++) {
@@ -129,6 +130,7 @@ public class Main {
                             }
                         }
                     }
+                //First Image top left
                 } else {
                     firstImage = false;
                     for (int yInnerLoop = 0; yInnerLoop < randomImageHeight; yInnerLoop++) {
@@ -175,99 +177,6 @@ public class Main {
 
     }
 
-    /*private static ArrayList<Coords> dijkstraAlgorithm(BufferedImage image) throws IOException {
-        ArrayList<Coords> coordsList = new ArrayList<>();
-        ArrayList<Node> nodes = new ArrayList<>();
-        int height = image.getHeight();
-        int width = image.getWidth();
-        int paddingCeil = (int) Math.ceil(width / 2);
-        int paddingFloor = (int) Math.floor(width / 2);
-
-        BufferedImage paddedImage = new BufferedImage(width, height + paddingCeil, BufferedImage.TYPE_INT_RGB);
-        Graphics2D concatImage = paddedImage.createGraphics();
-        concatImage.drawImage(image, 0, paddingCeil, null);
-        concatImage.dispose();
-
-        for (int y = 0; y < paddingCeil; y++) {
-            for (int xRightSide = 0; xRightSide < paddingCeil-y-1; xRightSide++) {
-                paddedImage.setRGB(xRightSide, y, new Color(255, 255, 255).getRGB());
-            }
-
-            for (int xLeftSide = paddingFloor+y+1; xLeftSide < width; xLeftSide++) {
-                paddedImage.setRGB(xLeftSide, y, new Color(255, 255, 255).getRGB());
-            }
-        }
-
-        nodes = initDijkstra(height+paddingCeil, width);
-        Node currentNode = new Node(new Coords(paddingFloor+1,0), 0, null);
-        currentNode.visited = true;
-
-        for (int y = 0; y < height+paddingCeil; y++) {
-            //get next+nearby nodes
-            Node left = new Node(new Coords(currentNode.node.x-1, y+1), new Color(paddedImage.getRGB(currentNode.node.x-1,y+1)).getGreen(), currentNode);
-            Node right = new Node(new Coords(currentNode.node.x+1, y+1), new Color(paddedImage.getRGB(currentNode.node.x+1,y+1)).getGreen(), currentNode);
-            Node center = new Node(new Coords(currentNode.node.x, y+1), new Color(paddedImage.getRGB(currentNode.node.x,y+1)).getGreen(), currentNode);
-
-            //register costs to nodes
-            for (Node node : nodes) {
-                if (node.node.x == left.node.y && node.node.y == left.node.y && left.visited == false) {
-                    node.costs = left.costs;
-                } else if (left.visited == true) {
-                    if (node.costs+left.costs < left.costs)
-                }
-            }
-            for (Node node : nodes) {
-                if (node.node.x == center.node.y && node.node.y == center.node.y && center.visited == false) {
-                    node.costs = center.costs;
-                } else if (center.visited == true) {
-
-                }
-            }
-            for (Node node : nodes) {
-                if (node.node.x == right.node.y && node.node.y == right.node.y && right.visited == false) {
-                    node.costs = right.costs;
-                } else if (right.visited == true) {
-
-                }
-            }
-
-            //find closest
-            Node closestNode;
-            if (left.costs < center.costs) {
-                closestNode = left;
-            } else if (center.costs < right.costs) {
-                closestNode = center;
-            } else {
-                closestNode = right;
-            }
-
-            //go to next node
-            for (Node node : nodes) {
-                if (node.node.x == closestNode.node.y && node.node.y == closestNode.node.y) {
-                    currentNode = node;
-                }
-            }
-        }
-
-        return coordsList;
-    }
-
-    private static Node getClosestNode(ArrayList<Node> nodes) {
-        int min = Integer.MAX_VALUE;
-
-
-    }
-
-    private static ArrayList<Node> initDijkstra(int height, int width) {
-        ArrayList<Node> nodes = new ArrayList<>();
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                nodes.add(new Node(new Coords(x,y), Integer.MAX_VALUE, null));
-            }
-        }
-        return nodes;
-    }*/
-
     private static ArrayList<Coords> findBestPath(BufferedImage image) {
         ArrayList<Coords> bestCoords = new ArrayList<>();
         ArrayList<ArrayList<Coords>> coordsList = new ArrayList<>();
@@ -277,72 +186,39 @@ public class Main {
         int bestColor = 0;
         int[] costs = new int[width];
 
-        for (int i = 0; i < width; i++) {
+        for (int column = 0; column < width; column++) {
             coordsList.add(new ArrayList<>());
-            int tmpColor = new Color(image.getRGB(i,0)).getGreen();
-            bestColor = tmpColor;
-            startPoint = i;
-            costs[i] += tmpColor;
+            int tmpColor = new Color(image.getRGB(column,0)).getGreen();
+            costs[column] = costs[column] + tmpColor;
+            coordsList.get(column).add(new Coords(startPoint, 0));
+            int lastXPos = column;
 
-            coordsList.get(i).add(new Coords(startPoint, 0));
-            int lastXPos = startPoint;
             for (int depth = 1; depth < height; depth++) {
                 int color1 = 0, color2 = 0, color3 = 0;
                 if (lastXPos != 0) {
                     color1 = new Color(image.getRGB((lastXPos-1),depth)).getGreen();
                 }
+                System.out.println((width-1) + " " + lastXPos + " " + width + " " + column + " " + depth);
                 color2 = new Color(image.getRGB(lastXPos,depth)).getGreen();
-                if (lastXPos == width) {
+                if (lastXPos < (width-1)) {
                     color3 = new Color(image.getRGB(lastXPos+1,depth)).getGreen();
                 }
 
                 if (color1 > color2) {
-                    coordsList.get(i).add(new Coords((lastXPos-1),depth));
+                    coordsList.get(column).add(new Coords((lastXPos-1),depth));
                     lastXPos = lastXPos - 1;
                     tmpColor = color1;
                 } else if (color2 > color3) {
-                    coordsList.get(i).add(new Coords(lastXPos,depth));
+                    coordsList.get(column).add(new Coords(lastXPos,depth));
                     lastXPos = lastXPos;
                     tmpColor = color2;
-                } else {
-                    coordsList.get(i).add(new Coords((lastXPos+1),depth));
+                } else if (lastXPos < (width-1)) {
+                    coordsList.get(column).add(new Coords((lastXPos+1),depth));
                     lastXPos = lastXPos + 1;
                     tmpColor = color3;
                 }
-                costs[i] += tmpColor;
+                costs[column] = costs[column] + tmpColor;
             }
-
-        /*ArrayList<Coords> coordsList = new ArrayList<>();
-        for (int i = 0; i < width; i++) {
-            int tmpColor = new Color(image.getRGB(i,0)).getGreen();
-            if (tmpColor > bestColor) {
-                bestColor = tmpColor;
-                startPoint = i;
-            }
-        }
-
-        coordsList.add(new Coords(startPoint, 0));
-        int lastXPos = startPoint;
-        for (int depth = 1; depth < height; depth++) {
-            int color1 = 0, color2, color3 = 0;
-            if (lastXPos != 0) {
-                color1 = new Color(image.getRGB((lastXPos-1),depth)).getGreen();
-            }
-            color2 = new Color(image.getRGB(lastXPos,depth)).getGreen();
-            if (lastXPos == width) {
-                color3 = new Color(image.getRGB(lastXPos+1,depth)).getGreen();
-            }
-
-            if (color1 > color2) {
-                coordsList.add(new Coords((lastXPos-1),depth));
-                lastXPos = lastXPos - 1;
-            } else if (color2 > color3) {
-                coordsList.add(new Coords(lastXPos,depth));
-                lastXPos = lastXPos;
-            } else {
-                coordsList.add(new Coords((lastXPos+1),depth));
-                lastXPos = lastXPos + 1;
-            }*/
         }
 
         int best = 0;
