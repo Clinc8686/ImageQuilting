@@ -26,7 +26,7 @@ public class Main {
     private static final int randomImageWidth = 32;
     private static final int endImageHeight = 192;
     private static final int endImageWidth = 192;
-    private static final int patchSize = 3;
+    private static final int patchSize = 4;
     private static BufferedImage inputImage;
     private static BufferedImage endImage;
 
@@ -37,6 +37,14 @@ public class Main {
         long start = System.currentTimeMillis();
         String pathString = System.getProperty("user.dir");
         inputImage = ImageIO.read(new File(pathString+"\\src\\de\\clinc8686\\texture\\imagequilting\\texture_input.jpg"));
+
+/*        for(int i = 2; i <= 10; i++) {
+            patchSize=i;
+            endImage = new BufferedImage(endImageHeight, endImageWidth, BufferedImage.TYPE_INT_ARGB);
+            ImageQuiltingWithCut();
+            ImageIO.write(endImage, "png", new File(pathString+"\\src\\de\\clinc8686\\texture\\imagequilting\\output_image_"+i+".png"));
+        }*/
+
         endImage = new BufferedImage(endImageHeight, endImageWidth, BufferedImage.TYPE_INT_ARGB);
         //ImageQuiltingWithBest();
         //showImage(endImage);
@@ -104,10 +112,10 @@ public class Main {
         boolean firstLine = true;
         int toFilledBlocksWidth = (int) (endImageWidth / randomImageWidth);
         int toFilledBlocksHeight = (int) (endImageHeight / randomImageHeight);
-        for (int xOuterLoop = 0; xOuterLoop < toFilledBlocksWidth; xOuterLoop++) {  //  HIER IST DER BUG. PROBLEM IST: ICH DURCHLAUFE ZUERST DIE LINKE SEITE ÜBER DIE Y-ACHSE, ICH MÜSSTE ABER DIE X-ACHSE ZUERST BEARBEITEN
-            int xPixelBlockPosition = xOuterLoop*randomImageHeight;
-            for (int yOuterLoop = 0; yOuterLoop < toFilledBlocksHeight; yOuterLoop++) {
-                int yPixelBlockPosition = yOuterLoop*randomImageWidth;
+        for (int yOuterLoop = 0; yOuterLoop < toFilledBlocksHeight; yOuterLoop++) {
+            int yPixelBlockPosition = yOuterLoop*randomImageWidth;
+            for (int xOuterLoop = 0; xOuterLoop < toFilledBlocksWidth; xOuterLoop++) {
+                int xPixelBlockPosition = xOuterLoop*randomImageHeight;
                 ArrayList<Coords> bestCutCoordsLR = new ArrayList<>();
                 ArrayList<Coords> bestCutCoordsTD = new ArrayList<>();
                 if (!firstImage) {
@@ -127,35 +135,19 @@ public class Main {
                     }
 
                     //First left pixel block in row
+                    BufferedImage concatBlock = bestImage;
+                    Graphics combinedImage = endImage.getGraphics();
                     if (!firstLine && xPixelBlockPosition == 0) {
-                        //concatSimplePadding(bestImage, xPixelBlockPosition, yPixelBlockPosition);
-                        BufferedImage concatBlock = bestImage;
-                        Graphics combinedImage = endImage.getGraphics();
                         int startPositionTD = yPixelBlockPosition-(patchSize*yOuterLoop);
-                        for (int xInnerLoop = 0; xInnerLoop < randomImageWidth; xInnerLoop++) {
-                            for (int yInnerLoop = 0; yInnerLoop < bestCutCoordsTD.get(xInnerLoop).y; yInnerLoop++) {
-                                Color col = new Color(0, 0, 0, 0);
-                                concatBlock.setRGB(xInnerLoop, yInnerLoop, col.getRGB());
-                            }
-                        }
-
+                        concatTopDownBlock(bestCutCoordsTD, concatBlock);
                         combinedImage.drawImage(concatBlock, 0, startPositionTD, null);
                         combinedImage.dispose();
                     } else {
                         if (firstLine) {
-                            BufferedImage concatBlock = bestImage;
-                            Graphics combinedImage = endImage.getGraphics();
                             concatLeftRightBlock(xOuterLoop, xPixelBlockPosition, bestCutCoordsLR, concatBlock, combinedImage, 0);
                         } else {
-                            BufferedImage concatBlock = bestImage;
-                            Graphics combinedImage = endImage.getGraphics();
                             int startPositionTD = yPixelBlockPosition-(patchSize*yOuterLoop);
-                            for (int xInnerLoop = 0; xInnerLoop < randomImageWidth; xInnerLoop++) {
-                                for (int yInnerLoop = 0; yInnerLoop < bestCutCoordsTD.get(xInnerLoop).y; yInnerLoop++) {
-                                    Color col = new Color(0, 0, 0, 0);
-                                    concatBlock.setRGB(xInnerLoop, yInnerLoop, col.getRGB());
-                                }
-                            }
+                            concatTopDownBlock(bestCutCoordsTD, concatBlock);
                             concatLeftRightBlock(xOuterLoop, xPixelBlockPosition, bestCutCoordsLR, concatBlock, combinedImage, startPositionTD);
                         }
                     }
@@ -167,6 +159,15 @@ public class Main {
                 endImageList.add(bestImage);
             }
             firstLine = false;
+        }
+    }
+
+    private static void concatTopDownBlock(ArrayList<Coords> bestCutCoordsTD, BufferedImage concatBlock) {
+        for (int xInnerLoop = 0; xInnerLoop < randomImageWidth; xInnerLoop++) {
+            for (int yInnerLoop = 0; yInnerLoop < bestCutCoordsTD.get(xInnerLoop).y; yInnerLoop++) {
+                Color col = new Color(0, 0, 0, 0);
+                concatBlock.setRGB(xInnerLoop, yInnerLoop, col.getRGB());
+            }
         }
     }
 
@@ -232,9 +233,9 @@ public class Main {
         int height = image.getHeight();
         int width = image.getWidth();
         BufferedImage rotatedImage = new BufferedImage(height, width, BufferedImage.TYPE_INT_RGB);
-            for (int i = 0; i < width; i++)
-                for (int j = 0; j < height; j++)
-                    rotatedImage.setRGB(height - j - 1, i, image.getRGB(i, j));
+        for (int i = 0; i < width; i++)
+            for (int j = 0; j < height; j++)
+                rotatedImage.setRGB(height - j - 1, i, image.getRGB(i, j));
 
         return rotatedImage;
     }
@@ -330,7 +331,6 @@ public class Main {
         for (BufferedImage image : allPixelBlocks) {
             for (int secondImageX = 0; secondImageX < patchSize; secondImageX++) {
                 int firstImageX = randomImageWidth - secondImageX - 1;
-
                 for (int y = 0; y < randomImageHeight; y++) {
                     Color firstImagePixelColor = new Color(inputImagePixels[firstImageX][y]);
                     Color secondImagePixelColor = new Color(image.getRGB(secondImageX,y));
@@ -341,7 +341,6 @@ public class Main {
 
             for (int firstImageY = 0; firstImageY < patchSize && !firstLine; firstImageY++) {
                 int secondImageY = randomImageHeight - firstImageY - 1;
-
                 for (int x = 0; x < patchSize; x++) {
                     Color firstImagePixelColor = new Color(topImagePixels[x][firstImageY]);
                     Color secondImagePixelColor = new Color(image.getRGB(x,secondImageY));
