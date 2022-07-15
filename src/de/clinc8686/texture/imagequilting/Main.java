@@ -34,16 +34,16 @@ public class Main {
         String pathString = System.getProperty("user.dir");
         inputImage = ImageIO.read(new File(pathString+"\\src\\de\\clinc8686\\texture\\imagequilting\\texture_input.jpg"));
 
-        for(int i = 2; i <= 10; i++) {
+        /*for(int i = 2; i <= 10; i++) {
             patchSize=i;
             endImage = new BufferedImage(endImageWidth, endImageHeight, BufferedImage.TYPE_INT_ARGB);
             ImageQuiltingWithCut();
             ImageIO.write(endImage, "png", new File(pathString+"\\src\\de\\clinc8686\\texture\\imagequilting\\output_image_"+i+".png"));
-        }
+        }*/
 
-        //endImage = new BufferedImage(endImageHeight, endImageWidth, BufferedImage.TYPE_INT_ARGB);
-        //ImageQuiltingWithCut();
-        //showImage(endImage);
+        endImage = new BufferedImage(endImageHeight, endImageWidth, BufferedImage.TYPE_INT_ARGB);
+        ImageQuiltingWithCut();
+        showImage(endImage);
         ImageIO.write(endImage, "png", new File(pathString+"\\src\\de\\clinc8686\\texture\\imagequilting\\output_image.png"));
 
         long end = System.currentTimeMillis();
@@ -124,7 +124,7 @@ public class Main {
      */
     private static void concatTopDownBlock(ArrayList<Coords> bestCutCoordsTD, BufferedImage concatBlock) {
         for (int xInnerLoop = 0; xInnerLoop < randomImageWidth; xInnerLoop++) {
-            for (int yInnerLoop = 0; yInnerLoop < bestCutCoordsTD.get(xInnerLoop).y; yInnerLoop++) {
+            for (int yInnerLoop = 0; yInnerLoop <= bestCutCoordsTD.get(xInnerLoop).y; yInnerLoop++) {
                 Color col = new Color(0, 0, 0, 0);
                 concatBlock.setRGB(xInnerLoop, yInnerLoop, col.getRGB());
             }
@@ -138,7 +138,7 @@ public class Main {
     private static void concatLeftRightBlock(int xOuterLoop, int xPixelBlockPosition, ArrayList<Coords> bestCutCoordsLR, BufferedImage concatBlock, Graphics combinedImage, int startPositionTD) {
         int startPositionLR = xPixelBlockPosition-(patchSize*xOuterLoop);
         for (int yInnerLoop = 0; yInnerLoop < randomImageHeight; yInnerLoop++) {
-            for (int xInnerLoop = 0; xInnerLoop < bestCutCoordsLR.get(yInnerLoop).x; xInnerLoop++) {
+            for (int xInnerLoop = 0; xInnerLoop <= bestCutCoordsLR.get(yInnerLoop).x; xInnerLoop++) {
                 Color col = new Color(0, 0, 0, 0);
                 concatBlock.setRGB(xInnerLoop, yInnerLoop, col.getRGB());
             }
