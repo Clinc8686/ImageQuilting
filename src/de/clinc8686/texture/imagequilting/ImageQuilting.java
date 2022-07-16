@@ -7,12 +7,12 @@ import java.io.IOException;
 import java.util.*;
 
 public class ImageQuilting {
-    /*
-    randomImageHeight and randomImageWidth defines the block size of each contiguous image (patches).
-    endImageHeight and endImageWidth defines the final image size of the endImage.
-    patchSize is the compared pixel width between the patch blocks.
-    inputImage is the original image.
-    endImage is the synthesized texture.
+    /**
+     * @param randomImageHeight and @param randomImageWidth defines the block size of each contiguous image (patches).
+     * @param endImageHeight and @param endImageWidth defines the final image size of the endImage.
+     * @param patchSize is the compared pixel width between the patch blocks.
+     * @param inputImage is the original image.
+     * @param endImage is the synthesized texture.
      */
     private final int randomImageHeight;
     private final int randomImageWidth;
@@ -22,8 +22,8 @@ public class ImageQuilting {
     private final BufferedImage inputImage;
     public BufferedImage endImage;
 
-    /*
-    main
+    /**
+     * Constructor
      */
     ImageQuilting(BufferedImage inputImage, int randomImageSize, int endImageSize, int overlapSize) throws IOException {
         this.inputImage = inputImage;
@@ -37,6 +37,9 @@ public class ImageQuilting {
         ImageQuiltingWithCut();
     }
 
+    /**
+     * Calculates the endImage size and fills the patches.
+     */
     public void ImageQuiltingWithCut() {
         boolean firstImage = true;
         boolean firstColumn = false;
@@ -106,8 +109,13 @@ public class ImageQuilting {
         }
     }
 
-    /*
-    Crops the best cut on the horizontal from the best matching image: The not matching pixels will be set to transparent.
+    /**
+     * Crops the best cut on the horizontal from the best matching image: The not matching pixels will be set to transparent.
+     *
+     * @param bestCutCoordsTD Best coordinates(x,y) between two superimposed images.
+     * @param concatBlock Copy of the best fitting Image.
+     *
+     * @return The image with transparent edge.
      */
     private BufferedImage concatTopDownBlock(ArrayList<Coords> bestCutCoordsTD, BufferedImage concatBlock) {
         for (int xInnerLoop = 0; xInnerLoop < randomImageWidth; xInnerLoop++) {
@@ -119,9 +127,16 @@ public class ImageQuilting {
         return concatBlock;
     }
 
-    /*
-    Crops the best cut on the vertical from the best matching image: The not matching pixels will be set to transparent.
-    It also prints the patch Block on the endImage.
+    /**
+     * Crops the best cut on the vertical from the best matching image: The not matching pixels will be set to transparent.
+     * It also prints the patch Block on the endImage.
+     *
+     * @param xPixelBlockPosition The position on the x-axis from which the end image will be filled with the bestImage. But without the calculation of the shift from the best cut.
+     * @param bestCutCoordsLR Best coordinates(x,y) between two superimposed images.
+     * @param combinedImage The end image on which the patch (=concatBlock) will be inserted.
+     * @param concatBlock Copy of the best fitting Image, possibly with a transparent edge.
+     * @param startPositionTD The position on the y-axis from which the end image will be filled with the bestImage.
+     * @param xOuterLoop The number of the patch block on the x-axis.
      */
     private void concatLeftRightBlock(int xOuterLoop, int xPixelBlockPosition, ArrayList<Coords> bestCutCoordsLR, BufferedImage concatBlock, Graphics combinedImage, int startPositionTD) {
         int startPositionLR = xPixelBlockPosition-(overlapSize*xOuterLoop);
@@ -135,10 +150,14 @@ public class ImageQuilting {
         combinedImage.dispose();
     }
 
-    /*
-    Prints a patch Block on the endImage.
-    This has to happen only in the first top left patch block.
-    */
+    /**
+     * Prints a patch Block on the endImage.
+     * This has to happen only in the first top left patch block.
+     *
+     * @param bestImage The best matching image for the current to be filled patch.
+     * @param xPixelBlockPosition The position on the x-axis from which the end image will be filled with the bestImage.
+     * @param yPixelBlockPosition The position on the y-axis from which the end image will be filled with the bestImage.
+     */
     private void concatSimplePatch(BufferedImage bestImage, int xPixelBlockPosition, int yPixelBlockPosition) {
         for (int yInnerLoop = 0; yInnerLoop < randomImageHeight; yInnerLoop++) {
             endImage.setRGB(xPixelBlockPosition, yInnerLoop+yPixelBlockPosition, bestImage.getRGB(0,yInnerLoop));
@@ -148,8 +167,13 @@ public class ImageQuilting {
         }
     }
 
-    /*
-    Calculates the best cut path between the top and bottom image
+    /**
+     * Calculates the best cut path between the top and bottom image.
+     *
+     * @param bestImagePixels The best matching image for the current to be filled patch.
+     * @param topImagePixels The patch above the currently to filled patch.
+     *
+     * @return  A list with the best x, y cut coordinates.
      */
     private ArrayList<Coords> cutOverlapTop(BufferedImage topImagePixels, BufferedImage bestImagePixels) {
         BufferedImage overlap = new BufferedImage(randomImageWidth, overlapSize, BufferedImage.TYPE_INT_ARGB);
@@ -168,8 +192,12 @@ public class ImageQuilting {
         return rotateCoords(rotatedBestCoords);
     }
 
-    /*
-    Rotates the Coords back
+    /**
+     * Rotates the Coords back.
+     *
+     * @param coords The vertical coordinates.
+     *
+     * @return The horizontal coordinates.
      */
     private ArrayList<Coords> rotateCoords(ArrayList<Coords> coords) {
         ArrayList<Coords> newCoords = new ArrayList<>();
@@ -179,8 +207,12 @@ public class ImageQuilting {
         return newCoords;
     }
 
-    /*
-    Rotates the given Image 90 degrees and returns it
+    /**
+     * Rotates the given Image 90 degrees and returns it.
+     *
+     * @param image The to be rotated image.
+     *
+     * @return The rotated image.
      */
     private BufferedImage rotateImage(BufferedImage image) {
         int height = image.getHeight();
@@ -193,8 +225,13 @@ public class ImageQuilting {
         return rotatedImage;
     }
 
-    /*
-    Calculates the best cut path between the left and right image.
+    /**
+     * Calculates the best cut path between the left and right image.
+     *
+     * @param bestImagePixels The best matching image for the current to be filled patch.
+     * @param leftImagePixels The left patch of the currently to filled patch.
+     *
+     * @return A list with the best x, y cut coordinates.
      */
     private ArrayList<Coords> cutOverlapLeft(BufferedImage leftImagePixels, BufferedImage bestImagePixels) {
         /*
@@ -215,8 +252,11 @@ public class ImageQuilting {
         return findBestPath(overlap);
     }
 
-    /*
-    Defines the best path through the grayscales image.
+    /**
+     * Defines the best cut path through the grayscale image.
+     *
+     * @param image The grayscale image with the comparison values.
+     * @return A list with the best x, y cut coordinates.
      */
     private ArrayList<Coords> findBestPath(BufferedImage image) {
         ArrayList<Coords> bestCoords;
@@ -274,8 +314,16 @@ public class ImageQuilting {
         return bestCoords;
     }
 
-    /*
-    Search for best matching image and returns it.
+    /**
+     * Search for best matching image and returns it.
+     *
+     * @param allPixelBlocks All possible images from the input image, with the size randomImageWidth x randomImageHeight.
+     * @param firstColumn The value if it is the first column in the end image.
+     * @param firstRow The value if it is the first row in the end image.
+     * @param inputImagePixels The left patch of the currently to filled patch.
+     * @param topImagePixels The patch above the currently to filled patch.
+     *
+     * @return
      */
     public BufferedImage compare(ArrayList<BufferedImage> allPixelBlocks, BufferedImage inputImagePixels, BufferedImage topImagePixels, boolean firstRow, boolean firstColumn) {
         ArrayList<ComparedImage> comparedImages = new ArrayList<>();
@@ -306,8 +354,13 @@ public class ImageQuilting {
         return chooseLowestError(comparedImages);
     }
 
-    /*
-    Returns the grayscaled color from two rgb Pixels based on the difference.
+    /**
+     * Returns the grayscaled color from two rgb Pixels based on the difference.
+     *
+     * @param firstColor The first pixel with his color value.
+     * @param secondColor The second pixel with his color value.
+     *
+     * @return The difference between the two colors, calculated as grayscaled values.
      */
     private int calculateAverageDifference(Color firstColor, Color secondColor) {
         double first = (firstColor.getRed() + firstColor.getBlue() + firstColor.getGreen()) / 3.0;
@@ -315,15 +368,24 @@ public class ImageQuilting {
         return (int) Math.sqrt(Math.pow((first-second), 2));
     }
 
-    /*
-    Returns the difference between two rgb Pixels.
+    /**
+     * Returns the difference between two rgb Pixels.
+     *
+     * @param firstColor The first pixel with his color value.
+     * @param secondColor The second pixel with his color value.
+     *
+     * @return The difference between the two colors.
      */
     private double calculateDifference(Color firstColor, Color secondColor) {
         return Math.sqrt(Math.pow((firstColor.getRed()-secondColor.getRed()), 2) + Math.pow((firstColor.getBlue() - secondColor.getBlue()), 2) + Math.pow((firstColor.getGreen()-secondColor.getGreen()), 2));
     }
 
-    /*
-    Compares all overlap errors and returns the best.
+    /**
+     * Compares all overlap errors and returns the best.
+     *
+     * @param comparedImages All existing images with their comparison value.
+     *
+     * @return The best matching image.
      */
     private BufferedImage chooseLowestError(ArrayList<ComparedImage> comparedImages) {
         double min = Double.MAX_VALUE;
@@ -339,9 +401,13 @@ public class ImageQuilting {
         return comparedImages.get(bestImage).image;
     }
 
-    /*
-    Runs through all pixels and slices each pixel with his neighbour pixels
-    into a new block that can later be iterated.
+    /**
+     * Runs through all pixels and slices each pixel with his neighbour pixels
+     * into a new block that can later be iterated.
+     *
+     * @param inputImage The complete input Image.
+     *
+     * @return All possible images from the input image, with the size randomImageWidth x randomImageHeight.
      */
     private ArrayList<BufferedImage> getAllPixelBlocks(BufferedImage inputImage) {
         int distanceToBorderXAxis = inputImage.getWidth() - randomImageWidth;
@@ -363,9 +429,12 @@ public class ImageQuilting {
         return allPixelBlocks;
     }
 
-    /*
-    Choose one random image from the input texture and use it as the start block.
-    The size of the start block is defined by randomImageWidth and randomImageHeight.
+    /**
+     * Choose one random image from the input texture and use it as the start block.
+     *
+     * @param inputPixels The complete input Image.
+     *
+     * @return A random image with the size of randomImageWidth x randomImageHeight.
      */
     private BufferedImage randomisedImage(BufferedImage inputPixels) {
         BufferedImage startImage = new BufferedImage(randomImageWidth, randomImageHeight, BufferedImage.TYPE_INT_ARGB);
@@ -386,8 +455,12 @@ public class ImageQuilting {
         return startImage;
     }
 
-    /*
-    Creates a deep copy from an given image.
+    /**
+     * Creates a deep copy from a given image.
+     *
+     * @param source The image from which a deep copy should be made.
+     *
+     * @return The deep copied image.
      */
     public static BufferedImage copyImage(BufferedImage source){
         BufferedImage b = new BufferedImage(source.getWidth(), source.getHeight(), source.getType());
@@ -397,8 +470,10 @@ public class ImageQuilting {
         return b;
     }
 
-    /*
-    Prints the image as jframe.
+    /**
+     * Prints the image as jframe.
+     *
+     * @param image The to be displayed image.
      */
     private void showImage(BufferedImage image) {
         JFrame frame = new JFrame();
