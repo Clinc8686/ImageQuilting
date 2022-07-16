@@ -1,10 +1,8 @@
 package de.clinc8686.texture.imagequilting;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -18,32 +16,28 @@ public class ImageQuilting {
     inputImage is the original image.
     endImage is the synthesized texture.
      */
-    public int randomImageHeight = 32;
-    public int randomImageWidth = 32;
-    public int endImageHeight = 192;
-    public int endImageWidth = 192;
-    public int overlapSize = 3;
-    public BufferedImage inputImage;
+    private final int randomImageHeight;
+    private final int randomImageWidth;
+    private final int endImageHeight;
+    private final int endImageWidth;
+    private final int overlapSize;
+    private final BufferedImage inputImage;
     public BufferedImage endImage;
 
     /*
     main
      */
-    ImageQuilting(int randomImageHeight, int randomImageWidth, int endImageHeight, int endImageWidth, int overlapSize) throws IOException {
+    ImageQuilting(BufferedImage inputImage, int randomImageSize, int endImageSize, int overlapSize) throws IOException {
         long start = System.currentTimeMillis();
-        String pathString = System.getProperty("user.dir");
-        inputImage = ImageIO.read(new File(pathString+"\\src\\de\\clinc8686\\texture\\imagequilting\\texture_input.jpg"));
-
-        this.randomImageHeight = randomImageHeight;
-        this.randomImageWidth = randomImageWidth;
-        this.endImageHeight = endImageHeight;
-        this.endImageWidth = endImageWidth;
+        this.inputImage = inputImage;
+        this.randomImageHeight = randomImageSize;
+        this.randomImageWidth = randomImageSize;
+        this.endImageHeight = endImageSize;
+        this.endImageWidth = endImageSize;
         this.overlapSize = overlapSize;
+        endImage = new BufferedImage(endImageWidth, endImageHeight, BufferedImage.TYPE_INT_ARGB);
 
-        endImage = new BufferedImage(endImageHeight, endImageWidth, BufferedImage.TYPE_INT_ARGB);
         ImageQuiltingWithCut();
-        //ImageIO.write(endImage, "png", new File(pathString+"\\src\\de\\clinc8686\\texture\\imagequilting\\output_image.png"));
-
         long end = System.currentTimeMillis();
         NumberFormat formatter = new DecimalFormat("#0.00000");
         System.out.print("Execution time is " + formatter.format((end - start) / 1000d) + " seconds");
@@ -51,25 +45,28 @@ public class ImageQuilting {
 
     public void ImageQuiltingWithCut() {
         boolean firstImage = true;
+        boolean firstColumn = false;
         int[][] inputImagePixels = getImagePixels(inputImage);
         BufferedImage startImage = randomisedImage(inputImagePixels);
         inputImagePixels = getImagePixels(startImage);
         BufferedImage bestImage = startImage;
+        BufferedImage bestImageCopy = copyImage(bestImage);
 
         ArrayList<BufferedImage> allPixelBlocks = getAllPixelBlocks(inputImage);
         ArrayList<BufferedImage> endImageList = new ArrayList<>();
-        boolean firstLine = true;
+        boolean firstRow = true;
         int toFilledBlocksWidth = (int) Math.ceil(endImageWidth / (double) (randomImageWidth-overlapSize));
         int toFilledBlocksHeight = (int) Math.ceil(endImageHeight / (double) (randomImageHeight-overlapSize));
         for (int yOuterLoop = 0; yOuterLoop < toFilledBlocksHeight; yOuterLoop++) {
             int yPixelBlockPosition = yOuterLoop*randomImageWidth;
+            firstColumn = true;
             for (int xOuterLoop = 0; xOuterLoop < toFilledBlocksWidth; xOuterLoop++) {
                 int xPixelBlockPosition = xOuterLoop*randomImageHeight;
                 ArrayList<Coords> bestCutCoordsLR;
                 ArrayList<Coords> bestCutCoordsTD = new ArrayList<>();
                 if (!firstImage) {
                     int[][] topImagePixels = new int[0][];
-                    if (!firstLine) {
+                    if (!firstRow) {
                         topImagePixels = getImagePixels(endImageList.get(endImageList.size()-toFilledBlocksWidth));
                         //Change bottom right pixels, to get the newest pixels
                         for (int xTopLeft = xPixelBlockPosition-(overlapSize*xOuterLoop)-overlapSize+randomImageWidth, x = 0; xTopLeft < xPixelBlockPosition-(overlapSize*xOuterLoop)+randomImageWidth; xTopLeft++, x++) {
@@ -79,54 +76,65 @@ public class ImageQuilting {
                             }
                         }
                     }
-                    bestImage = compare(allPixelBlocks, inputImagePixels, topImagePixels, firstLine);
-                    inputImagePixels = getImagePixels(bestImage);
 
+                    bestImage = compare(allPixelBlocks, inputImagePixels, topImagePixels, firstRow, firstColumn);
+                    bestImageCopy = copyImage(bestImage);
+                    inputImagePixels = getImagePixels(bestImageCopy);
                     int[][] leftImagePixels = getImagePixels(endImageList.get(endImageList.size()-1));
                     bestCutCoordsLR = cutOverlapLeft(leftImagePixels, inputImagePixels);
 
-                    if (!firstLine) {
+                    if (!firstRow) {
                         bestCutCoordsTD = cutOverlapTop(topImagePixels, inputImagePixels);
                     }
 
                     //First left pixel block in row
-                    BufferedImage concatBlock = bestImage;
+                    BufferedImage concatBlock = bestImageCopy;
                     Graphics combinedImage = endImage.getGraphics();
-                    if (!firstLine && xPixelBlockPosition == 0) {
+                    if (!firstRow && firstColumn) {
                         int startPositionTD = yPixelBlockPosition-(overlapSize*yOuterLoop);
-                        concatTopDownBlock(bestCutCoordsTD, concatBlock);
+                        concatBlock = concatTopDownBlock(bestCutCoordsTD, concatBlock);
                         combinedImage.drawImage(concatBlock, 0, startPositionTD, null);
                         combinedImage.dispose();
                     } else {
-                        if (firstLine) {
+                        if (firstRow) {
                             concatLeftRightBlock(xOuterLoop, xPixelBlockPosition, bestCutCoordsLR, concatBlock, combinedImage, 0);
                         } else {
                             int startPositionTD = yPixelBlockPosition-(overlapSize*yOuterLoop);
-                            concatTopDownBlock(bestCutCoordsTD, concatBlock);
+                            concatBlock = concatTopDownBlock(bestCutCoordsTD, concatBlock);
                             concatLeftRightBlock(xOuterLoop, xPixelBlockPosition, bestCutCoordsLR, concatBlock, combinedImage, startPositionTD);
                         }
                     }
                 //First image top left or first left pixel block in row
                 } else {
                     firstImage = false;
-                    concatSimplePatch(bestImage, xPixelBlockPosition, yPixelBlockPosition);
+                    concatSimplePatch(bestImageCopy, xPixelBlockPosition, yPixelBlockPosition);
                 }
                 endImageList.add(bestImage);
+                firstColumn = false;
             }
-            firstLine = false;
+            firstRow = false;
         }
+    }
+
+    public static BufferedImage copyImage(BufferedImage source){
+        BufferedImage b = new BufferedImage(source.getWidth(), source.getHeight(), source.getType());
+        Graphics g = b.getGraphics();
+        g.drawImage(source, 0, 0, null);
+        g.dispose();
+        return b;
     }
 
     /*
     Crops the best cut on the horizontal from the best matching image: The not matching pixels will be set to transparent.
      */
-    private void concatTopDownBlock(ArrayList<Coords> bestCutCoordsTD, BufferedImage concatBlock) {
+    private BufferedImage concatTopDownBlock(ArrayList<Coords> bestCutCoordsTD, BufferedImage concatBlock) {
         for (int xInnerLoop = 0; xInnerLoop < randomImageWidth; xInnerLoop++) {
             for (int yInnerLoop = 0; yInnerLoop <= bestCutCoordsTD.get(xInnerLoop).y; yInnerLoop++) {
-                Color col = new Color(0, 0, 0, 0);
+                Color col = new Color(255, 0, 0, 0);
                 concatBlock.setRGB(xInnerLoop, yInnerLoop, col.getRGB());
             }
         }
+        return concatBlock;
     }
 
     /*
@@ -137,11 +145,10 @@ public class ImageQuilting {
         int startPositionLR = xPixelBlockPosition-(overlapSize*xOuterLoop);
         for (int yInnerLoop = 0; yInnerLoop < randomImageHeight; yInnerLoop++) {
             for (int xInnerLoop = 0; xInnerLoop <= bestCutCoordsLR.get(yInnerLoop).x; xInnerLoop++) {
-                Color col = new Color(0, 0, 0, 0);
+                Color col = new Color(0, 255, 0, 0);
                 concatBlock.setRGB(xInnerLoop, yInnerLoop, col.getRGB());
             }
         }
-
         combinedImage.drawImage(concatBlock, startPositionLR, startPositionTD, null);
         combinedImage.dispose();
     }
@@ -288,11 +295,11 @@ public class ImageQuilting {
     /*
     Search for best matching image and returns it.
      */
-    public BufferedImage compare(ArrayList<BufferedImage> allPixelBlocks, int[][] inputImagePixels, int[][] topImagePixels, boolean firstLine) {
+    public BufferedImage compare(ArrayList<BufferedImage> allPixelBlocks, int[][] inputImagePixels, int[][] topImagePixels, boolean firstRow, boolean firstColumn) {
         ArrayList<ComparedImage> comparedImages = new ArrayList<>();
         double error = 0;
         for (BufferedImage image : allPixelBlocks) {
-            for (int secondImageX = 0; secondImageX < overlapSize; secondImageX++) {
+            for (int secondImageX = 0; secondImageX < overlapSize && !firstColumn; secondImageX++) {
                 int firstImageX = randomImageWidth - secondImageX - 1;
                 for (int y = 0; y < randomImageHeight; y++) {
                     Color firstImagePixelColor = new Color(inputImagePixels[firstImageX][y]);
@@ -302,7 +309,7 @@ public class ImageQuilting {
                 }
             }
 
-            for (int firstImageY = 0; firstImageY < overlapSize && !firstLine; firstImageY++) {
+            for (int firstImageY = 0; firstImageY < overlapSize && !firstRow; firstImageY++) {
                 int secondImageY = randomImageHeight - firstImageY - 1;
                 for (int x = 0; x < overlapSize; x++) {
                     Color firstImagePixelColor = new Color(topImagePixels[x][firstImageY]);
@@ -419,7 +426,7 @@ public class ImageQuilting {
         int[][] pixels = new int[imageWidth][imageHeight];
 
         for (int w = 0; w < imageWidth; w++) {
-            for (int h = 0; h < imageWidth; h++) {
+            for (int h = 0; h < imageHeight; h++) {
                 pixels[w][h] = inputImage.getRGB(w, h);
             }
         }
