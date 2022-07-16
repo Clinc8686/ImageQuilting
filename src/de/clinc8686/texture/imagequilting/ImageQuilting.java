@@ -48,12 +48,6 @@ public class ImageQuilting {
     public void ImageQuiltingWithCut() {
         boolean firstImage = true;
         boolean firstColumn = false;
-        int[][] inputImagePixels = getImagePixels(inputImage);
-        calcArray(inputImagePixels);
-        calcImage(inputImage);
-        BufferedImage startImage = randomisedImage(inputImage);
-        //inputImagePixels = getImagePixels(startImage);
-        //BufferedImage bestImage = startImage;
         BufferedImage bestImage = inputImage;
         BufferedImage bestImageCopy = copyImage(bestImage);
 
@@ -87,8 +81,6 @@ public class ImageQuilting {
 
                     bestImage = compare(allPixelBlocks, bestImage, topImage, firstRow, firstColumn);
                     bestImageCopy = copyImage(bestImage);
-                    //inputImagePixels = getImagePixels(bestImageCopy);
-                    //int[][] leftImagePixels = getImagePixels(endImageList.get(endImageList.size()-1));
                     bestCutCoordsLR = cutOverlapLeft(endImageList.get(endImageList.size()-1), bestImage);
 
                     if (!firstRow) {
@@ -370,7 +362,6 @@ public class ImageQuilting {
     into a new block that can later be iterated.
      */
     private ArrayList<BufferedImage> getAllPixelBlocks(BufferedImage inputImage) {
-        //int[][] inputImagePixels = getImagePixels(inputImage);
         int distanceToBorderXAxis = inputImage.getWidth() - randomImageWidth;
         int distanceToBorderYAxis = inputImage.getHeight() - randomImageHeight;
 
@@ -439,15 +430,5 @@ public class ImageQuilting {
             }
         }
         return pixels;
-    }
-
-    private void calcArray(int[][] array) {
-        System.out.println("Integer Array needs: " + (((array.length-1)*(array[0].length-1)) * Integer.SIZE) + " Bytes");
-    }
-
-    private void calcImage(BufferedImage image) {
-        DataBuffer dataBuffer = image.getData().getDataBuffer();
-        long sizeBytes = ((long) dataBuffer.getSize()) * 4l;
-        System.out.println("Buffered Image needs: " + sizeBytes + " Bytes");
     }
 }
