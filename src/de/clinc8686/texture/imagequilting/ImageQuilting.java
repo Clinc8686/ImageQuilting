@@ -414,21 +414,4 @@ public class ImageQuilting {
         }
         return startImage;
     }
-
-    /*
-    Converts the image into his pixel rgb-values and returns it.
-     */
-    private int[][] getImagePixels(BufferedImage inputImage) {
-        int imageHeight = inputImage.getHeight();
-        int imageWidth = inputImage.getWidth();
-
-        int[][] pixels = new int[imageWidth][imageHeight];
-
-        for (int w = 0; w < imageWidth; w++) {
-            for (int h = 0; h < imageHeight; h++) {
-                pixels[w][h] = inputImage.getRGB(w, h);
-            }
-        }
-        return pixels;
-    }
 }
