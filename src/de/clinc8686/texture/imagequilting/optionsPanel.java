@@ -106,6 +106,7 @@ public class optionsPanel extends JPanel implements ActionListener, ChangeListen
                 outputPanel.printImage(iq.endImage);
             } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException ex) {
                 info.append("\npatch or overlap size too high");
+                ex.printStackTrace();
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
