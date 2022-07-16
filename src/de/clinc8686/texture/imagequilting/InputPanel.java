@@ -4,9 +4,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-public class inputPanel extends JPanel {
+public class InputPanel extends JPanel {
     JLabel input;
-    inputPanel() {
+
+    InputPanel() {
         super();
         this.setBorder(BorderFactory.createTitledBorder("Input"));
         input = new JLabel();

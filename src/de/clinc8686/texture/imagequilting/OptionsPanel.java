@@ -12,10 +12,10 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-public class optionsPanel extends JPanel implements ActionListener, ChangeListener {
+public class OptionsPanel extends JPanel implements ActionListener, ChangeListener {
     JButton startBtn, clearBtn, chooseBtn;
-    outputPanel outputPanel;
-    inputPanel inputPanel;
+    OutputPanel outputPanel;
+    InputPanel inputPanel;
     JLabel patchSizeText, imageSizeText, overlapSliderText;
     JSlider patchSize, imageSizeSlider, overlapSlider;
     JTextArea info;
@@ -23,7 +23,7 @@ public class optionsPanel extends JPanel implements ActionListener, ChangeListen
     String inputPath;
     BufferedImage inputImage;
 
-    public optionsPanel(inputPanel ip, outputPanel ouP) {
+    public OptionsPanel(InputPanel ip, OutputPanel ouP) {
         super();
         inputPanel = ip;
         outputPanel = ouP;

@@ -4,10 +4,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-public class outputPanel extends JPanel {
+public class OutputPanel extends JPanel {
     JLabel output;
 
-    public outputPanel() {
+    public OutputPanel() {
         super();
         this.setBorder(BorderFactory.createTitledBorder("Output"));
     }

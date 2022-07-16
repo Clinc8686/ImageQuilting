@@ -4,8 +4,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.*;
 
 public class ImageQuilting {
@@ -28,7 +26,6 @@ public class ImageQuilting {
     main
      */
     ImageQuilting(BufferedImage inputImage, int randomImageSize, int endImageSize, int overlapSize) throws IOException {
-        long start = System.currentTimeMillis();
         this.inputImage = inputImage;
         this.randomImageHeight = randomImageSize;
         this.randomImageWidth = randomImageSize;
@@ -38,9 +35,6 @@ public class ImageQuilting {
         endImage = new BufferedImage(endImageWidth, endImageHeight, BufferedImage.TYPE_INT_ARGB);
 
         ImageQuiltingWithCut();
-        long end = System.currentTimeMillis();
-        NumberFormat formatter = new DecimalFormat("#0.00000");
-        System.out.println("Execution time is " + formatter.format((end - start) / 1000d) + " seconds");
     }
 
     public void ImageQuiltingWithCut() {
