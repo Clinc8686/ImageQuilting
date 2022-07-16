@@ -3,9 +3,7 @@ package de.clinc8686.texture.imagequilting;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBuffer;
 import java.io.IOException;
-import java.lang.instrument.Instrumentation;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
@@ -48,7 +46,7 @@ public class ImageQuilting {
     public void ImageQuiltingWithCut() {
         boolean firstImage = true;
         boolean firstColumn = false;
-        BufferedImage bestImage = inputImage;
+        BufferedImage bestImage = randomisedImage(inputImage);
         BufferedImage bestImageCopy = copyImage(bestImage);
 
         ArrayList<BufferedImage> allPixelBlocks = getAllPixelBlocks(inputImage);
@@ -76,8 +74,6 @@ public class ImageQuilting {
                             }
                         }
                     }
-
-
 
                     bestImage = compare(allPixelBlocks, bestImage, topImage, firstRow, firstColumn);
                     bestImageCopy = copyImage(bestImage);
