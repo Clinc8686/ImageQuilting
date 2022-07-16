@@ -112,14 +112,6 @@ public class ImageQuilting {
         }
     }
 
-    public static BufferedImage copyImage(BufferedImage source){
-        BufferedImage b = new BufferedImage(source.getWidth(), source.getHeight(), source.getType());
-        Graphics g = b.getGraphics();
-        g.drawImage(source, 0, 0, null);
-        g.dispose();
-        return b;
-    }
-
     /*
     Crops the best cut on the horizontal from the best matching image: The not matching pixels will be set to transparent.
      */
@@ -378,17 +370,6 @@ public class ImageQuilting {
     }
 
     /*
-    Prints the image as jframe.
-     */
-    private void showImage(BufferedImage image) {
-        JFrame frame = new JFrame();
-        frame.getContentPane().setLayout(new FlowLayout());
-        frame.getContentPane().add(new JLabel(new ImageIcon(image)));
-        frame.pack();
-        frame.setVisible(true);
-    }
-
-    /*
     Choose one random image from the input texture and use it as the start block.
     The size of the start block is defined by randomImageWidth and randomImageHeight.
      */
@@ -409,5 +390,27 @@ public class ImageQuilting {
             wStartImage++;
         }
         return startImage;
+    }
+
+    /*
+    Creates a deep copy from an given image.
+     */
+    public static BufferedImage copyImage(BufferedImage source){
+        BufferedImage b = new BufferedImage(source.getWidth(), source.getHeight(), source.getType());
+        Graphics g = b.getGraphics();
+        g.drawImage(source, 0, 0, null);
+        g.dispose();
+        return b;
+    }
+
+    /*
+    Prints the image as jframe.
+     */
+    private void showImage(BufferedImage image) {
+        JFrame frame = new JFrame();
+        frame.getContentPane().setLayout(new FlowLayout());
+        frame.getContentPane().add(new JLabel(new ImageIcon(image)));
+        frame.pack();
+        frame.setVisible(true);
     }
 }
