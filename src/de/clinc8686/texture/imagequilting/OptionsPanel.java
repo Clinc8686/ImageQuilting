@@ -22,6 +22,7 @@ public class OptionsPanel extends JPanel implements ActionListener, ChangeListen
     JFileChooser fileChooser;
     String inputPath;
     BufferedImage inputImage;
+    ImageQuilting iq;
 
     public OptionsPanel(InputPanel ip, OutputPanel ouP) {
         super();
@@ -102,8 +103,9 @@ public class OptionsPanel extends JPanel implements ActionListener, ChangeListen
                 if (overlapSlider.getValue() >= patchSize.getValue()/4) {
                     throw new ArrayIndexOutOfBoundsException("");
                 }
-                ImageQuilting iq = new ImageQuilting(inputImage, patchSize.getValue(), imageSizeSlider.getValue(), overlapSlider.getValue());
+                iq = new ImageQuilting(inputImage, patchSize.getValue(), imageSizeSlider.getValue(), overlapSlider.getValue());
                 outputPanel.printImage(iq.endImage);
+                inputPanel.printFirstBlock(iq.firstBlock);
             } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException ex) {
                 info.append("\npatch or overlap size too high");
                 ex.printStackTrace();

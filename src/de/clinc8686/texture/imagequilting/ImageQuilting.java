@@ -21,6 +21,7 @@ public class ImageQuilting {
     private final int overlapSize;
     private final BufferedImage inputImage;
     public BufferedImage endImage;
+    public BufferedImage firstBlock;
 
     /**
      * Constructor
@@ -44,6 +45,7 @@ public class ImageQuilting {
         boolean firstImage = true;
         boolean firstColumn = false;
         BufferedImage bestImage = randomisedImage(inputImage);
+        firstBlock = copyImage(bestImage);
         BufferedImage bestImageCopy = copyImage(bestImage);
 
         ArrayList<BufferedImage> allPixelBlocks = getAllPixelBlocks(inputImage);
