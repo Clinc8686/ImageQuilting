@@ -1,11 +1,11 @@
-package de.clinc8686.texture.imagequilting;
+package de.hochschuletrier.docu.imagequilting;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 public class ComparedImage {
-    BufferedImage image;
-    double difference;
+    public BufferedImage image;
+    public double difference;
 
     ComparedImage(BufferedImage image, double difference) {
         this.difference = difference;

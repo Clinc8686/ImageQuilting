@@ -1,11 +1,11 @@
-package de.clinc8686.texture.imagequilting;
+package de.hochschuletrier.docu.imagequilting;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class InputPanel extends JPanel {
-    JLabel input;
+    private JLabel input;
 
     InputPanel() {
         super();

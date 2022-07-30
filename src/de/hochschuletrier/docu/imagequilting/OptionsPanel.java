@@ -1,4 +1,4 @@
-package de.clinc8686.texture.imagequilting;
+package de.hochschuletrier.docu.imagequilting;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -11,18 +11,19 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class OptionsPanel extends JPanel implements ActionListener, ChangeListener {
-    JButton startBtn, clearBtn, chooseBtn;
-    OutputPanel outputPanel;
-    InputPanel inputPanel;
-    JLabel patchSizeText, imageSizeText, overlapSliderText;
-    JSlider patchSize, imageSizeSlider, overlapSlider;
-    JTextArea info;
-    JFileChooser fileChooser;
-    String inputPath;
-    BufferedImage inputImage;
-    ImageQuilting iq;
+    private JButton startBtn, clearBtn, chooseBtn;
+    private final OutputPanel outputPanel;
+    private final InputPanel inputPanel;
+    private JLabel patchSizeText, imageSizeText, overlapSliderText;
+    private JSlider patchSize, imageSizeSlider, overlapSlider;
+    private JTextArea info;
+    private JFileChooser fileChooser;
+    private String inputPath;
+    private BufferedImage inputImage;
 
     public OptionsPanel(InputPanel ip, OutputPanel ouP) {
         super();
@@ -103,9 +104,14 @@ public class OptionsPanel extends JPanel implements ActionListener, ChangeListen
                 if (overlapSlider.getValue() >= patchSize.getValue()/4) {
                     throw new ArrayIndexOutOfBoundsException("");
                 }
-                iq = new ImageQuilting(inputImage, patchSize.getValue(), imageSizeSlider.getValue(), overlapSlider.getValue());
+                ImageQuilting iq = new ImageQuilting(inputImage, patchSize.getValue(), imageSizeSlider.getValue(), overlapSlider.getValue());
                 outputPanel.printImage(iq.endImage);
                 inputPanel.printFirstBlock(iq.firstBlock);
+                //tmp
+                String fileName = new SimpleDateFormat("yyyyMMddHHmm").format(new Date());
+                ImageIO.write(iq.endImage, "png", new File("C:\\Users\\Mario\\OneDrive\\Dokumente\\(Hoch)Schule\\Hochschule-Trier\\6_Semester\\Tool- und Pluginprogrammierung\\Hausarbeit\\Ergebnisse\\" + fileName + "_endImage.png"));
+                ImageIO.write(inputImage, "png", new File("C:\\Users\\Mario\\OneDrive\\Dokumente\\(Hoch)Schule\\Hochschule-Trier\\6_Semester\\Tool- und Pluginprogrammierung\\Hausarbeit\\Ergebnisse\\" + fileName + "_inputImage.png"));
+                //tmp
             } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException ex) {
                 info.append("\npatch or overlap size too high");
                 ex.printStackTrace();
@@ -116,6 +122,9 @@ public class OptionsPanel extends JPanel implements ActionListener, ChangeListen
             outputPanel.removeAll();
             outputPanel.validate();
             outputPanel.repaint();
+            inputPanel.removeAll();
+            inputPanel.validate();
+            inputPanel.repaint();
             info.setText("Infopanel:");
         } else if (e.getSource() == chooseBtn) {
             int value = fileChooser.showOpenDialog(null);

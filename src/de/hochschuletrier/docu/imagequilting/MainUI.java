@@ -1,4 +1,4 @@
-package de.clinc8686.texture.imagequilting;
+package de.hochschuletrier.docu.imagequilting;
 
 import javax.swing.*;
 import java.awt.*;

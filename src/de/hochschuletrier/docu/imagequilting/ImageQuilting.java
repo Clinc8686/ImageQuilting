@@ -1,4 +1,4 @@
-package de.clinc8686.texture.imagequilting;
+package de.hochschuletrier.docu.imagequilting;
 
 import javax.swing.*;
 import java.awt.*;
@@ -47,7 +47,6 @@ public class ImageQuilting {
         BufferedImage bestImage = randomisedImage(inputImage);
         firstBlock = copyImage(bestImage);
         BufferedImage bestImageCopy = copyImage(bestImage);
-
         ArrayList<BufferedImage> allPixelBlocks = getAllPixelBlocks(inputImage);
         ArrayList<BufferedImage> endImageList = new ArrayList<>();
         boolean firstRow = true;
@@ -73,7 +72,6 @@ public class ImageQuilting {
                             }
                         }
                     }
-
                     bestImage = compare(allPixelBlocks, bestImage, topImage, firstRow, firstColumn);
                     bestImageCopy = copyImage(bestImage);
                     bestCutCoordsLR = cutOverlapLeft(endImageList.get(endImageList.size()-1), bestImage);
@@ -379,7 +377,10 @@ public class ImageQuilting {
      * @return The difference between the two colors.
      */
     private double calculateDifference(Color firstColor, Color secondColor) {
-        return Math.sqrt(Math.pow((firstColor.getRed()-secondColor.getRed()), 2) + Math.pow((firstColor.getBlue() - secondColor.getBlue()), 2) + Math.pow((firstColor.getGreen()-secondColor.getGreen()), 2));
+        return Math.sqrt(
+                Math.pow((firstColor.getRed()-secondColor.getRed()), 2) +
+                Math.pow((firstColor.getBlue() - secondColor.getBlue()), 2) +
+                Math.pow((firstColor.getGreen()-secondColor.getGreen()), 2));
     }
 
     /**
@@ -399,7 +400,6 @@ public class ImageQuilting {
             }
             counter++;
         }
-
         return comparedImages.get(bestImage).image;
     }
 

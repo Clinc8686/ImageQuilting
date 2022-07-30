@@ -1,11 +1,11 @@
-package de.clinc8686.texture.imagequilting;
+package de.hochschuletrier.docu.imagequilting;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class OutputPanel extends JPanel {
-    JLabel output;
+    private JLabel output;
 
     public OutputPanel() {
         super();
