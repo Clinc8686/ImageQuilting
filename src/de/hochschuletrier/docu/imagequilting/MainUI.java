@@ -2,10 +2,12 @@ package de.hochschuletrier.docu.imagequilting;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
 
 public class MainUI extends JPanel {
-    public static void main(String[] args) throws IOException {
+    /**
+     * Start of the Program. Defines the frame with the panels on it.
+     */
+    public static void main(String[] args) {
         JFrame mainFrame = new JFrame("Image Quilting");
         mainFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);

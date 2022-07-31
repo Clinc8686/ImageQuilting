@@ -1,3 +1,3 @@
 Manifest-Version: 1.0
-Main-Class: de.clinc8686.texture.imagequilting.MainUI
+Main-Class: de.hochschuletrier.docu.imagequilting.MainUI
 

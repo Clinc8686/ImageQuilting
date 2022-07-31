@@ -11,8 +11,6 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class OptionsPanel extends JPanel implements ActionListener, ChangeListener {
     private JButton startBtn, clearBtn, chooseBtn;
@@ -25,6 +23,12 @@ public class OptionsPanel extends JPanel implements ActionListener, ChangeListen
     private String inputPath;
     private BufferedImage inputImage;
 
+    /**
+     * Constructor defines some Layout options.
+     *
+     * @param ip The input panel from the center.
+     * @param ouP The output panel from the left.
+     */
     public OptionsPanel(InputPanel ip, OutputPanel ouP) {
         super();
         inputPanel = ip;
@@ -35,6 +39,9 @@ public class OptionsPanel extends JPanel implements ActionListener, ChangeListen
         defineChooserTextArea();
     }
 
+    /**
+     * Create two Options on the OptionPanel.
+     */
     private void defineChooserTextArea() {
         info = new JTextArea();
         info.setText("Infopanel:");
@@ -50,6 +57,9 @@ public class OptionsPanel extends JPanel implements ActionListener, ChangeListen
         fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Image Files", "jpg", "png"));
     }
 
+    /**
+     * Creates the 3 options slider and 2 option buttons.
+     */
     private void defineSlider() {
         startBtn = new JButton("Start image quilting");
         startBtn.addActionListener(this);
@@ -76,6 +86,12 @@ public class OptionsPanel extends JPanel implements ActionListener, ChangeListen
 
     }
 
+    /**
+     * Creates a JLabel with a text.
+     *
+     * @param text The text for the JLabel.
+     * @return The JLabel with the text on it.
+     */
     private JLabel createText(String text) {
         JLabel tf = new JLabel(text, JLabel.CENTER);
         tf.setFont(tf.getFont().deriveFont(20f));
@@ -83,6 +99,15 @@ public class OptionsPanel extends JPanel implements ActionListener, ChangeListen
         return tf;
     }
 
+    /**
+     * Creates a slider with some defined values.
+     *
+     * @param minimum The minimum value of the slider.
+     * @param maximum The maximum value of the slider.
+     * @param value The start value of the slider.
+     * @param tickSpace The distances of the marks between the maximum and the minimum.
+     * @return The defined slider.
+     */
     private JSlider createSlider(int minimum, int maximum, int value, int tickSpace) {
         JSlider slider = new JSlider();
         slider.setMinimum(minimum);
@@ -96,33 +121,37 @@ public class OptionsPanel extends JPanel implements ActionListener, ChangeListen
         return slider;
     }
 
-
+    /**
+     * Responds to the changes of the buttons on the options panel.
+     *
+     * @param e The given ActionEvent from a Button.
+     */
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == startBtn){
             try {
-                if (overlapSlider.getValue() >= patchSize.getValue()/4) {
-                    throw new ArrayIndexOutOfBoundsException("");
+                int overlap = overlapSlider.getValue();
+                int endsize = imageSizeSlider.getValue();
+                int patch = patchSize.getValue();
+                if (overlap >= endsize || overlap >= patch) {
+                    throw new IllegalOverlapException("bad overlap");
+                } else if (patch >= endsize) {
+                    throw new IllegalPatchException("bad patch");
                 }
-                ImageQuilting iq = new ImageQuilting(inputImage, patchSize.getValue(), imageSizeSlider.getValue(), overlapSlider.getValue());
+                ImageQuilting iq = new ImageQuilting(inputImage, patch, imageSizeSlider.getValue(), overlap);
                 outputPanel.printImage(iq.endImage);
                 inputPanel.printFirstBlock(iq.firstBlock);
-                //tmp
-                String fileName = new SimpleDateFormat("yyyyMMddHHmm").format(new Date());
-                ImageIO.write(iq.endImage, "png", new File("C:\\Users\\Mario\\OneDrive\\Dokumente\\(Hoch)Schule\\Hochschule-Trier\\6_Semester\\Tool- und Pluginprogrammierung\\Hausarbeit\\Ergebnisse\\" + fileName + "_endImage.png"));
-                ImageIO.write(inputImage, "png", new File("C:\\Users\\Mario\\OneDrive\\Dokumente\\(Hoch)Schule\\Hochschule-Trier\\6_Semester\\Tool- und Pluginprogrammierung\\Hausarbeit\\Ergebnisse\\" + fileName + "_inputImage.png"));
-                //tmp
-            } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException ex) {
-                info.append("\npatch or overlap size too high");
-                ex.printStackTrace();
-            } catch (IOException ex) {
-                ex.printStackTrace();
+            } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException | IOException ex) {
+                info.append("\nThere is something wrong");
+            } catch (IllegalOverlapException | IllegalPatchException ex) {
+                info.append("\n" + ex.getMessage());
             }
         } else if (e.getSource() == clearBtn) {
             outputPanel.removeAll();
             outputPanel.validate();
             outputPanel.repaint();
             inputPanel.removeAll();
+            inputPanel.printImage(inputImage);
             inputPanel.validate();
             inputPanel.repaint();
             info.setText("Infopanel:");
@@ -140,6 +169,11 @@ public class OptionsPanel extends JPanel implements ActionListener, ChangeListen
         }
     }
 
+    /**
+     * Responds to the changes of the slider at the options panel.
+     *
+     * @param e The given ActionEvent from a Slider.
+     */
     @Override
     public void stateChanged(ChangeEvent e) {
         Object source = e.getSource();
